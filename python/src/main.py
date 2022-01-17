@@ -1,6 +1,7 @@
 from enum import Enum
+from typing import List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 from pydantic import BaseModel
 
@@ -73,8 +74,13 @@ async def create_item(item_id: int, item: Item, q: str | None = None):
 @app.get("/item/{item_id}")
 async def read_item(
     item_id: str,
-    needy: str,
-    q: str | None = None,
+    needy: List[str] = Query(
+        ...,
+        title="Querty string",
+        description="Query string for the items to search in the database that have a good match",
+        alias="kek-lol",
+        regex="^[0-9]*$"),
+    q: str | None = Query(None, min_length=2, max_length=5, regex="^[a-zA-Z]*$"),
     short: bool = False
 ):
     item = {"item_id": item_id, "needy": needy}
