@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Path, Query
 
 from pydantic import BaseModel
 
@@ -25,11 +25,6 @@ app = FastAPI()
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
-
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int):
-    return {"item_id": item_id}
 
 
 @app.get("/models/{model_name}")
@@ -73,7 +68,7 @@ async def create_item(item_id: int, item: Item, q: str | None = None):
 
 @app.get("/item/{item_id}")
 async def read_item(
-    item_id: str,
+    item_id: int = Path(..., title="The ID of the item to get", ge=10, lt=1000),
     needy: List[str] = Query(
         ...,
         title="Querty string",
