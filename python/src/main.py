@@ -1,15 +1,20 @@
 from enum import Enum
-from typing import List
+from typing import List, Set
 
 from fastapi import Body, FastAPI, Path, Query
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class ModelName(str, Enum):
     alexnet = "alexnet"
     resnet = "resnet"
     lenet = "lenet"
+
+
+class Image(BaseModel):
+    url: HttpUrl
+    name: str
 
 
 class Item(BaseModel):
@@ -19,11 +24,22 @@ class Item(BaseModel):
     )
     price: float = Field(..., gt=0, description="The price must be greater than zero")
     tax: float | None = None
+    tags: List[str] = []
+    keks: Set[str] = set()
+    images: List[Image] | None = None
+
+
+class Offer(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    items: List[Item]
 
 
 class User(BaseModel):
     username: str
     full_name: str | None = None
+    image: Image | None = None
 
 
 app = FastAPI()
