@@ -20,19 +20,40 @@ class Image(BaseModel):
 class Item(BaseModel):
     name: str
     description: str | None = Field(
-        None, title="The description of the item", max_length=300
+        None,
+        title="The description of the item",
+        max_length=300,
     )
-    price: float = Field(..., gt=0, description="The price must be greater than zero")
+    price: float = Field(
+        ...,
+        gt=0,
+        description="The price must be greater than zero")
     tax: float | None = None
     tags: List[str] = []
     keks: Set[str] = set()
     images: List[Image] | None = None
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Foo",
+                "description": "A very nice Item",
+                "price": 35.4,
+                "tax": 3.2,
+                "tags": ["bar", "baz"],
+                "keks": {"bar", "baz"},
+                "images": [
+                    { "url": "https://lol.kek", "name": "Lol kek" },
+                    { "url": "https://kek.lol", "name": "Kek lol" },
+                ],
+            }
+        }
+
 
 class Offer(BaseModel):
-    name: str
-    description: str | None = None
-    price: float
+    name: str = Field(..., example="Foo")
+    description: str | None = Field(None, example="Bar")
+    price: float = Field(..., example=5.4)
     items: List[Item]
 
 
