@@ -1,5 +1,7 @@
+from datetime import datetime, time, timedelta
 from enum import Enum
 from typing import List, Set
+from uuid import UUID
 
 from fastapi import Body, FastAPI, Path, Query
 
@@ -147,3 +149,24 @@ async def read_user_item(
             {"description": "This is an amazing item that has a long description"}
         )
     return item
+
+
+@app.put("/data/{data_id}")
+async def update_data(
+    data_id: UUID,
+    start_datetime: datetime | None = Body(None),
+    end_datetime: datetime | None = Body(None),
+    repeat_at: time | None = Body(None),
+    process_after: timedelta | None = Body(None),
+):
+    start_process = start_datetime + process_after
+    duration = end_datetime - start_process
+    return {
+        "data_id": data_id,
+        "start_datetime": start_datetime,
+        "end_datetime": end_datetime,
+        "repeat_at": repeat_at,
+        "process_after": process_after,
+        "start_process": start_process,
+        "duration": duration,
+    }
