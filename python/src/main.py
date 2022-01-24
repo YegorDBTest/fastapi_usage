@@ -3,7 +3,7 @@ from enum import Enum
 from typing import List, Set
 from uuid import UUID
 
-from fastapi import Body, FastAPI, Path, Query
+from fastapi import Body, Cookie, FastAPI, Header, Path, Query
 
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -159,8 +159,13 @@ async def update_data(
     repeat_at: time | None = Body(None),
     process_after: timedelta | None = Body(None),
 ):
-    start_process = start_datetime + process_after
-    duration = end_datetime - start_process
+    if start_datetime and process_after:
+        start_process = start_datetime + process_after
+    else:
+        start_process = datetime.now()
+
+    duration = (end_datetime or datetime.now()) - start_process
+
     return {
         "data_id": data_id,
         "start_datetime": start_datetime,
@@ -169,4 +174,17 @@ async def update_data(
         "process_after": process_after,
         "start_process": start_process,
         "duration": duration,
+    }
+
+
+@app.get("/ads/")
+async def read_ads(
+    ads_id: str | None = Cookie(None),
+    asd_token: str | None = Header(None),
+    x_token: list[str] | None = Header(None)
+):
+    return {
+        "ads_id": ads_id,
+        "Asd-Token": asd_token,
+        "X-Token": x_token,
     }
