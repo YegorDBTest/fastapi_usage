@@ -5,7 +5,7 @@ from uuid import UUID
 
 from fastapi import Body, Cookie, FastAPI, Header, Path, Query
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, EmailStr, Field, HttpUrl
 
 
 class ModelName(str, Enum):
@@ -188,3 +188,21 @@ async def read_ads(
         "Asd-Token": asd_token,
         "X-Token": x_token,
     }
+
+
+class UserIn(BaseModel):
+    username: str
+    password: str
+    email: EmailStr
+    full_name: str | None = None
+
+
+class UserOut(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: str | None = None
+
+
+@app.post("/user/", response_model=UserOut)
+async def create_user(user: UserIn):
+    return user
