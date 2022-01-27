@@ -3,7 +3,7 @@ from enum import Enum
 from typing import List, Set
 from uuid import UUID
 
-from fastapi import Body, Cookie, FastAPI, Header, Path, Query
+from fastapi import Body, Cookie, FastAPI, Form, Header, Path, Query, status
 
 from pydantic import BaseModel, EmailStr, Field, HttpUrl
 
@@ -95,7 +95,7 @@ fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"
 async def read_items(skip: int = 0, limit: int = 10):
     return fake_items_db[skip : skip + limit]
 
-@app.post("/items/")
+@app.post("/items/", status_code=status.HTTP_201_CREATED)
 async def create_item(item: Item = Body(..., embed=True)):
     item_dict = item.dict()
     if item.tax:
@@ -223,3 +223,8 @@ def fake_save_user(user_in: UserIn):
 async def create_user(user_in: UserIn):
     user_saved = fake_save_user(user_in)
     return user_saved
+
+
+@app.post("/login/")
+async def login(username: str = Form(...), password: str = Form(...)):
+    return {"username": username}
