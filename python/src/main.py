@@ -3,7 +3,9 @@ from enum import Enum
 from typing import List, Set
 from uuid import UUID
 
-from fastapi import Body, Cookie, FastAPI, Form, Header, Path, Query, status
+from fastapi import (
+    Body, Cookie, FastAPI, Form, Header, Path, Query, status, File, UploadFile
+)
 
 from pydantic import BaseModel, EmailStr, Field, HttpUrl
 
@@ -228,3 +230,19 @@ async def create_user(user_in: UserIn):
 @app.post("/login/")
 async def login(username: str = Form(...), password: str = Form(...)):
     return {"username": username}
+
+
+@app.post("/files/")
+async def create_file(file: bytes | None = File(None)):
+    if not file:
+        return {"message": "No file sent"}
+    else:
+        return {"file_size": len(file)}
+
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile | None = None):
+    if not file:
+        return {"message": "No upload file sent"}
+    else:
+        return {"filename": file.filename}
