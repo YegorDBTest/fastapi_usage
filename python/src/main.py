@@ -241,8 +241,22 @@ async def create_file(file: bytes | None = File(None)):
 
 
 @app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile | None = None):
+async def create_upload_file(
+    file: UploadFile = File(..., description="A file read as UploadFile")
+):
     if not file:
         return {"message": "No upload file sent"}
     else:
         return {"filename": file.filename}
+
+
+@app.post("/files-multiple/")
+async def create_files_multiple(files: list[bytes] = File(...)):
+    return {"file_sizes": [len(file) for file in files]}
+
+
+@app.post("/uploadfiles-multiple/")
+async def create_upload_files_multiple(
+    files: list[UploadFile] = File(..., description="Multiple files as UploadFile")
+):
+    return {"filenames": [file.filename for file in files]}
