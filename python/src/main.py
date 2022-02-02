@@ -4,10 +4,17 @@ from typing import List, Set
 from uuid import UUID
 
 from fastapi import (
-    Body, Cookie, FastAPI, Form, Header, Path, Query, status, File, UploadFile
+    Body, Cookie, FastAPI, Form, Header, Path, Query, status, File, UploadFile,
+    HTTPException, Request,
 )
+from fastapi.responses import JSONResponse
 
 from pydantic import BaseModel, EmailStr, Field, HttpUrl
+
+
+class UnicornException(Exception):
+    def __init__(self, item_id: int):
+        self.item_id = item_id
 
 
 class ModelName(str, Enum):
@@ -70,6 +77,14 @@ class User(BaseModel):
 app = FastAPI()
 
 
+@app.exception_handler(UnicornException)
+async def unicorn_exception_handler(request: Request, exc: UnicornException):
+    return JSONResponse(
+        status_code=418,
+        content={"message": f"Oops! {exc.name} did something. There goes a rainbow..."},
+    )
+
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -126,6 +141,14 @@ async def read_item(
     q: str | None = Query(None, min_length=2, max_length=5, regex="^[a-zA-Z]*$"),
     short: bool = False
 ):
+    if item_id < 20:
+        raise HTTPException(
+            status_code=404,
+            detail="Item not found",
+            headers={"X-Error": "There goes my error"},
+        )
+    elif item_id = 20:
+        raise UnicornException(item_id=item_id)
     item = {"item_id": item_id, "needy": needy}
     if q:
         item.update({"q": q})
@@ -233,7 +256,11 @@ async def login(username: str = Form(...), password: str = Form(...)):
 
 
 @app.post("/files/")
-async def create_file(file: bytes | None = File(None)):
+async def create_file(
+    file: bytes = File(...),
+    fileb: UploadFile = File(...),
+    token: str = Form(...)
+):
     if not file:
         return {"message": "No file sent"}
     else:
