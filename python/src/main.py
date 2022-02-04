@@ -82,6 +82,11 @@ class User(BaseModel):
     image: Image | None = None
 
 
+class Tags(Enum):
+    items = "items"
+    users = "users"
+
+
 app = FastAPI()
 
 
@@ -140,12 +145,28 @@ async def read_file(file_path: str):
 
 fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
 
-@app.get("/items/")
+@app.get("/items/", tags=Tags.items)
 async def read_items(skip: int = 0, limit: int = 10):
     return fake_items_db[skip : skip + limit]
 
-@app.post("/items/", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/items/",
+    status_code=status.HTTP_201_CREATED,
+    tags=Tags.items,
+    summary="Create an item",
+    response_description="The created item",
+)
 async def create_item(item: Item = Body(..., embed=True)):
+    """
+    Create an item with all the information:
+
+    - **name**: each item must have a name
+    - **description**: a long description
+    - **price**: required
+    - **tax**: if the item doesn't have tax, you can omit this
+    - **tags**: a set of unique tag strings for this item
+    """
+
     item_dict = item.dict()
     if item.tax:
         item_dict.update({
@@ -276,7 +297,7 @@ def fake_save_user(user_in: UserIn):
     return user_in_db
 
 
-@app.post("/user/", response_model=UserOut)
+@app.post("/user/", response_model=UserOut, tags=Tags.users)
 async def create_user(user_in: UserIn):
     user_saved = fake_save_user(user_in)
     return user_saved
